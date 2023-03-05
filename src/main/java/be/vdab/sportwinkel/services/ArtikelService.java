@@ -2,8 +2,8 @@ package be.vdab.sportwinkel.services;
 
 import be.vdab.sportwinkel.domain.Artikel;
 import be.vdab.sportwinkel.events.ArtikelGemaakt;
+import be.vdab.sportwinkel.repositories.ArtikelGemaaktRepository;
 import be.vdab.sportwinkel.repositories.ArtikelRepository;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -11,16 +11,18 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 public class ArtikelService {
-    private final ArtikelRepository repository;
-    private final AmqpTemplate template;
+    private final ArtikelRepository artikelRepository;
+    private final ArtikelGemaaktRepository artikelGemaaktRepository;
 
-    public ArtikelService(ArtikelRepository repository, AmqpTemplate template) {
-        this.repository = repository;
-        this.template = template;
+    public ArtikelService(ArtikelRepository artikelRepository,
+                          ArtikelGemaaktRepository artikelGemaaktRepository) {
+        this.artikelRepository = artikelRepository;
+        this.artikelGemaaktRepository = artikelGemaaktRepository;
     }
 
     public void create(Artikel artikel) {
-        repository.save(artikel);
-        template.convertAndSend("sportartikels", null, new ArtikelGemaakt(artikel));
+        artikelRepository.save(artikel);
+        artikelGemaaktRepository.save(new ArtikelGemaakt(artikel));
+        //template.convertAndSend("sportartikels", null, new ArtikelGemaakt(artikel));
     }
 }
